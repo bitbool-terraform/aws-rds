@@ -1,31 +1,46 @@
-resource "aws_security_group" "dbaccess" {
-  for_each =  { for k, v in var.dbs :  k => v if lookup(v,"enabled",true) != false } 
+resource "aws_security_group" "dbaccess_unmanaged" {
+  count = var.create_sgs ? 1 : 0
 
-  name     = format("%s-rds-access-%s",var.project,each.value.dbname)
-  vpc_id   = data.terraform_remote_state.base.outputs.vpc_id
+  name     = format("rds-%s-access-unmanaged",var.db_name)
+  vpc_id   = var.vpc_id
 
-  tags = merge(local.tags_module_sgs,{"rds" = each.value.dbname, "Name" = format("%s-rds-access-%s",var.project,each.value.dbname)})
+  tags = merge({ TFModule = "aws-rds", "rds" = var.db_name, "Name" = format("rds-%s-access-unmanaged",var.db_name)})
 
   lifecycle { ignore_changes = [ingress,egress] }
 
 }
 
 
-resource "aws_security_group" "dbaccessViaSg" {
-  for_each =  { for k, v in var.dbs :  k => v if lookup(v,"enabled",true) != false } 
+resource "aws_security_group" "dbaccess" {
+  count = var.create_sgs ? 1 : 0
 
-  name     = format("%s-rds-dbaccessViaSg-%s",var.project,each.value.dbname)
-  vpc_id   = data.terraform_remote_state.base.outputs.vpc_id
+  name     = format("rds-%s-access",var.db_name)
+  vpc_id   = var.vpc_id
 
-  tags = merge(local.tags_module_sgs,{"rds" = each.value.dbname, "Name" = format("%s-rds-dbaccessViaSg-%s",var.project,each.value.dbname)})
+  tags = merge({ TFModule = "aws-rds", "rds" = var.db_name, "Name" = format("rds-%s-access",var.db_name)})
 
-  ingress {
-    from_port = 5432
-    to_port   = 5432
-    protocol  = "tcp"
+  dynamic "ingress" {
+    for_each = var.security_group_source_ranges
+    content {
+      from_port = lookup(var.db,"port",var.port)
+      to_port   = lookup(var.db,"port",var.port)
+      protocol  = "tcp"
 
-    cidr_blocks = var.users_vpn_range
-    description = "hivecloud vpn users"
+      cidr_blocks = ingress.value
+      description = "acess from module"
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = var.security_group_source_sgs
+    content {
+      from_port = lookup(var.db,"port",var.port)
+      to_port   = lookup(var.db,"port",var.port)
+      protocol  = "tcp"
+
+      security_groups = [ingress.value]
+      description = "acess from module"
+    }
   }
 
 }

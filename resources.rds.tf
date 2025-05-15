@@ -31,7 +31,7 @@ resource "aws_db_instance" "db" {
   backup_window      = "03:00-05:00"
 
   # disable backups to create DB faster
-  backup_retention_period = 30
+  backup_retention_period = var.backup_retention_period
   skip_final_snapshot = "false"
 
   copy_tags_to_snapshot = true

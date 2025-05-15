@@ -68,3 +68,4 @@ variable "kms_key_id" {}
 variable "db_iam_roles" { default = {} }
 
 
+variable "backup_retention_period" { default = 15 }  #15 is max if backup is enabled

@@ -37,9 +37,9 @@ variable "database_insights_mode" { default = null }
 variable "deletion_protection" { default = true }
 
 variable "engine" { default = "postgres" }
-variable "engine_version" { default = "14.12" }
+variable "engine_version" {}
 variable "license_model" { default = "postgresql-license" }
-variable "parameter_group_name" { default = "default.postgres14" }
+variable "parameter_group_name" { default = null }
 
 
 variable "allocated_storage" { default = 30 }
@@ -64,5 +64,7 @@ variable "security_group_source_ranges" { default = []}
 variable "security_group_source_sgs" {default = []}
 
 variable "kms_key_id" {}
+
+variable "db_iam_roles" { default = {} }
 
 

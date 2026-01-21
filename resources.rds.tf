@@ -22,7 +22,7 @@ resource "aws_db_instance" "db" {
   manage_master_user_password = var.dbAdminPassword == null 
   port     = lookup(var.db,"port",var.port)
 
-  #availability_zone = each.value.azs[0]
+  availability_zone = try(var.db.az,null)
   multi_az = lookup(var.db,"multi_az",var.multi_az)
   vpc_security_group_ids = concat(aws_security_group.dbaccess_unmanaged.*.id,aws_security_group.dbaccess.*.id)
   publicly_accessible = lookup(var.db,"publicly_accessible",false)
@@ -57,7 +57,7 @@ resource "aws_db_instance" "db" {
   monitoring_role_arn = lookup(var.db,"monitoring_interval",var.monitoring_interval) > 0 ? aws_iam_role.rds_enhanced_monitoring[0].arn : null
   performance_insights_enabled = true
   performance_insights_kms_key_id = var.kms_key_id
-  performance_insights_retention_period = 7
+  performance_insights_retention_period = lookup(var.db,"database_insights_mode","standard") == "advanced" ? 465 : 7
   iam_database_authentication_enabled = true
   
   storage_encrypted = true

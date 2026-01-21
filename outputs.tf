@@ -8,7 +8,7 @@ output "sg_unmanaged" {
 
 
 output "master_password_secret_arn" {
-  value = aws_db_instance.db[0].master_user_secret 
+  value = aws_db_instance.db[0].master_user_secret[0].secret_arn 
 }
 
 output "master_username" {

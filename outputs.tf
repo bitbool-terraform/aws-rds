@@ -3,9 +3,12 @@ output "db" {
 }
 
 output "sg_unmanaged" {
- value = aws_security_group.dbaccess_unmanaged[0]
+ value = try(aws_security_group.dbaccess_unmanaged[0],null)
 }
 
+output "sg_that_grants_access" {
+ value = try(aws_security_group.grant_db_access[0],null)
+}
 
 output "master_password_secret_arn" {
   value = aws_db_instance.db[0].master_user_secret[0].secret_arn 
